@@ -1,0 +1,24 @@
+on: []
+name: CI
+jobs:
+  build:
+    name: "Build on Racket '${{ matrix.racket-version }}' (${{ matrix.racket-variant }})"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        racket-version: ["stable"]
+        racket-variant: ["CS"]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: Bogdanp/setup-racket@v1.0
+        with:
+          architecture: x64
+          distribution: minimal
+          variant: ${{ matrix.racket-variant }}
+          version: ${{ matrix.racket-version }}
+      - name: Installing ind-regexp and its dependencies
+        run: raco pkg install --no-docs --auto --name ind-regexp
+      - name: Compiling ind-regexp and building its docs
+        run: raco setup --check-pkg-deps ind-regexp
+      - name: Testing ind-regexp
+        run: raco test -c tests/ind-regexp
